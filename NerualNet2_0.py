@@ -71,7 +71,7 @@ class NeuralNet:
         self.weights=[w-eta*nw/len(mini_batch) for w,nw in zip(self.weights,nabla_w_sum)]
         self.bios=[b-eta*nb/len(mini_batch) for b,nb in zip(self.bios,nabla_b_sum)]
         
-    def fit(self,trainmat,labelmat,learning_rate=0.1,mini_batch_size=50,cycles=5000):
+    def fit(self,trainmat,labelmat,learning_rate=0.1,mini_batch_size=10,cycles=100):
         print('正在训练神经网络，这可能需要较长时间，请等待。。。')
         for i in range(cycles):
             if i%100==0:
@@ -100,11 +100,42 @@ class NeuralNet:
         for i in range(len(self.weights)):
             z=np.dot(self.weights[i],a)+self.bios[i]
             a=self.activation(z)
-        m=a.max()
-        a=list(a[0])##只有一行，变成列表
-        ##输出向量中数字最大的下标即为该类别
-        return a.index(m)
+        return a.argmax(axis=0)
                 
-                
-        
-        
+
+if __name__=='__main__':
+    a=np.random.randint(-20,20,(100,3))
+    for each in a:
+        if each[0]>0 and each[1]>0:
+            each[2]=1
+        elif each[0]<0 and each[1]>0:
+            each[2]=2
+        elif each[0]<0 and each[1]<0:
+            each[2]=3
+        elif each[0]>0 and each[1]<0:
+            each[2]=4
+        else:
+            each[2]=0
+    x_train=a[:,:2]
+    y_train=a[:,2]
+    b=np.random.randint(-20,20,(100,3))
+    for each in b:
+        if each[0]>0 and each[1]>0:
+            each[2]=1
+        elif each[0]<0 and each[1]>0:
+            each[2]=2
+        elif each[0]<0 and each[1]<0:
+            each[2]=3
+        elif each[0]>0 and each[1]<0:
+            each[2]=4
+        else:
+            each[2]=0
+    nn=NeuralNet([2,5,5])
+    nn.fit(x_train,y_train)
+    y_train_pred=nn.predict(x_train)
+    
+    x_test=b[:,:2]
+    y_test=b[:,2]
+    y_test_pred=nn.predict(x_test)
+    print('训练集正确率',np.sum(y_train_pred==y_train)/len(y_train))
+    print('测试集正确率',np.sum(y_test_pred==y_test)/len(y_test))
